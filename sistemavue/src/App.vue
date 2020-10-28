@@ -21,7 +21,7 @@ export default {
     Navbar,
   },
   data: () => ({
-    sectionName: 'Home',
+    sectionName: 'Inicio',
   }),
   methods: {
     setSectionName(newValue) {
