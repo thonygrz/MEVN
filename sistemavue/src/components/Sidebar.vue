@@ -1,5 +1,10 @@
 <template>
-  <v-navigation-drawer class="navigation-drawer" permanent expand-on-hover>
+  <v-navigation-drawer
+    class="navigation-drawer"
+    permanent
+    expand-on-hover
+    absolute
+  >
     <v-list nav dense>
       <v-list-item-group
         v-model="group"
