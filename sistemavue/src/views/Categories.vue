@@ -1,16 +1,24 @@
 <template>
   <div>
-    <h1>Categorías</h1>
     <v-data-table
       :headers="headers"
       :items="desserts"
       sort-by="calories"
       class="elevation-1"
+      :search="search"
     >
       <template v-slot:top>
         <v-toolbar flat>
           <v-toolbar-title>Categorías</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
+          <v-text-field
+            v-model="search"
+            prepend-icon="mdi-magnify"
+            label="Buscar"
+            single-line
+            hide-details
+            justify="center"
+          ></v-text-field>
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
@@ -111,6 +119,7 @@
 export default {
   name: 'Categories',
   data: () => ({
+    search: '',
     dialog: false,
     dialogDelete: false,
     headers: [
