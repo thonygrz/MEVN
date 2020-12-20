@@ -29,35 +29,38 @@
               <v-card-title>
                 <span class="headline">{{ formTitle }}</span>
               </v-card-title>
+              <v-form ref="form" v-model="valid" lazy-validation>
+                <v-card-text>
+                  <v-container>
+                    <v-row>
+                      <v-col cols="12" sm="12">
+                        <v-text-field
+                          v-model="nombre"
+                          label="Nombre"
+                          :counter="50"
+                          :rules="[rules.required, rules.min]"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="12">
+                        <v-text-field
+                          v-model="descripcion"
+                          label="Descripción"
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                </v-card-text>
 
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col cols="12" sm="6">
-                      <v-text-field
-                        v-model="nombre"
-                        label="Nombre"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="12">
-                      <v-text-field
-                        v-model="descripcion"
-                        label="Descripción"
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
-
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="close">
-                  Cancelar
-                </v-btn>
-                <v-btn color="blue darken-1" text @click="save">
-                  Guardar
-                </v-btn>
-              </v-card-actions>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="blue darken-1" text @click="close">
+                    Cancelar
+                  </v-btn>
+                  <v-btn color="blue darken-1" text @click="save">
+                    Guardar
+                  </v-btn>
+                </v-card-actions>
+              </v-form>
             </v-card>
           </v-dialog>
           <v-dialog v-model="dialogDelete" max-width="500px">
@@ -126,6 +129,13 @@ export default {
     _id: '',
     nombre: '',
     descripcion: '',
+    rules: {
+      required: value => !!value || 'Campo requerido',
+      min: v =>
+        (v && v.length >= 1 && v.length <= 53) ||
+        'El nombre debe estar entre 1 y 50 caracteres',
+    },
+    valid: false,
   }),
 
   computed: {
@@ -182,6 +192,7 @@ export default {
 
     close() {
       this.dialog = false
+      this.$refs.form.resetValidation()
       this.$nextTick(() => {
         this.editedIndex = -1
       })
@@ -206,19 +217,21 @@ export default {
         // se edita
       } else {
         // se guarda el nuevo item
-        try {
-          await axios.post('/category/add', {
-            name: this.nombre,
-            description: this.descripcion,
-          })
-          this.clean()
+        if (this.$refs.form.validate()) {
+          try {
+            await axios.post('/category/add', {
+              name: this.nombre,
+              description: this.descripcion,
+            })
+            this.clean()
+            this.close()
+            this.getCategorias()
+          } catch (error) {
+            console.log(error)
+          }
           this.close()
-          this.getCategorias()
-        } catch (error) {
-          console.log(error)
         }
       }
-      this.close()
     },
 
     getColor(status) {
