@@ -174,8 +174,10 @@ export default {
     },
 
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item)
-      this.editedItem = Object.assign({}, item)
+      this._id = item._id
+      this.nombre = item.name
+      this.descripcion = item.description
+      this.editedIndex = 1
       this.dialog = true
     },
 
@@ -213,8 +215,23 @@ export default {
     },
 
     async save() {
-      if (this.editedIndex > -1) {
+      if (this.editedIndex === 1) {
         // se edita
+        if (this.$refs.form.validate()) {
+          try {
+            await axios.put('/category/update', {
+              _id: this._id,
+              name: this.nombre,
+              description: this.descripcion,
+            })
+            this.clean()
+            this.close()
+            this.getCategorias()
+          } catch (error) {
+            console.log(error)
+          }
+          this.close()
+        }
       } else {
         // se guarda el nuevo item
         if (this.$refs.form.validate()) {

@@ -9,7 +9,8 @@ router.post("/add", CategoryController.add);
 router.get("/query", auth.verifyStorekeeper, CategoryController.query);
 // router.get('/list',auth.verifyStorekeeper,CategoryController.list)
 router.get("/list", CategoryController.list);
-router.put("/update", auth.verifyStorekeeper, CategoryController.update);
+// router.put("/update", auth.verifyStorekeeper, CategoryController.update);
+router.put("/update", CategoryController.update);
 router.delete("/remove", auth.verifyStorekeeper, CategoryController.remove);
 router.put("/activate", auth.verifyStorekeeper, CategoryController.activate);
 router.put(
