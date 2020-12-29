@@ -65,16 +65,30 @@
           </v-dialog>
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
-              <v-card-title class="headline"
-                >¿Estás seguro de eliminar este item?</v-card-title
+              <v-card-title v-if="!actionType" class="headline"
+                >¿Estás seguro de desactivar este item?</v-card-title
+              >
+              <v-card-title v-else class="headline"
+                >¿Estás seguro de activar este item?</v-card-title
               >
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="closeDelete"
                   >Cancelar</v-btn
                 >
-                <v-btn color="blue darken-1" text @click="deleteItemConfirm"
-                  >OK</v-btn
+                <v-btn
+                  v-if="!actionType"
+                  color="blue darken-1"
+                  text
+                  @click="deactivateItemConfirm"
+                  >Desactivar</v-btn
+                >
+                <v-btn
+                  v-else
+                  color="blue darken-1"
+                  text
+                  @click="activateItemConfirm"
+                  >Activar</v-btn
                 >
                 <v-spacer></v-spacer>
               </v-card-actions>
@@ -86,8 +100,11 @@
         <v-icon small class="mr-2" @click="editItem(item)">
           mdi-pencil
         </v-icon>
-        <v-icon small @click="deleteItem(item)">
-          mdi-delete
+        <v-icon v-if="item.status === 1" small @click="deactivateItem(item)">
+          mdi-cancel
+        </v-icon>
+        <v-icon v-else small @click="activateItem(item)">
+          mdi-check
         </v-icon>
       </template>
       <template v-slot:no-data>
@@ -117,7 +134,7 @@ export default {
       { text: 'Acciones', value: 'actions', sortable: false },
       { text: 'Nombre', value: 'name' },
       { text: 'Descripcion', value: 'description' },
-      { text: 'Estado', value: 'status' },
+      { text: 'Estado', value: 'status', align: 'center' },
     ],
     editedIndex: -1,
     defaultItem: {
@@ -136,6 +153,8 @@ export default {
         'El nombre debe estar entre 1 y 50 caracteres',
     },
     valid: false,
+    item: null,
+    actionType: null,
   }),
 
   computed: {
@@ -181,14 +200,43 @@ export default {
       this.dialog = true
     },
 
-    deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item)
-      this.editedItem = Object.assign({}, item)
+    deactivateItem(item) {
+      this._id = item._id
+      this.actionType = 0
       this.dialogDelete = true
     },
 
-    deleteItemConfirm() {
-      this.desserts.splice(this.editedIndex, 1)
+    activateItem(item) {
+      this._id = item._id
+      this.actionType = 1
+      this.dialogDelete = true
+    },
+
+    async deactivateItemConfirm() {
+      try {
+        await axios.put('/category/deactivate', {
+          _id: this._id,
+        })
+        this.clean()
+        this.close()
+        this.getCategorias()
+      } catch (error) {
+        console.log(error)
+      }
+      this.closeDelete()
+    },
+
+    async activateItemConfirm() {
+      try {
+        await axios.put('/category/activate', {
+          _id: this._id,
+        })
+        this.clean()
+        this.close()
+        this.getCategorias()
+      } catch (error) {
+        console.log(error)
+      }
       this.closeDelete()
     },
 

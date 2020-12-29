@@ -12,11 +12,13 @@ router.get("/list", CategoryController.list);
 // router.put("/update", auth.verifyStorekeeper, CategoryController.update);
 router.put("/update", CategoryController.update);
 router.delete("/remove", auth.verifyStorekeeper, CategoryController.remove);
-router.put("/activate", auth.verifyStorekeeper, CategoryController.activate);
-router.put(
-  "/deactivate",
-  auth.verifyStorekeeper,
-  CategoryController.deactivate
-);
+// router.put("/activate", auth.verifyStorekeeper, CategoryController.activate);
+router.put("/activate", CategoryController.activate);
+// router.put(
+//   "/deactivate",
+//   auth.verifyStorekeeper,
+//   CategoryController.deactivate
+// );
+router.put("/deactivate", CategoryController.deactivate);
 
 export default router;
