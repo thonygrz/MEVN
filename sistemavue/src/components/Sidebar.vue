@@ -4,19 +4,23 @@
     permanent
     expand-on-hover
     absolute
+    v-if="isAdmin || isSeller || isStorekeeper"
   >
     <v-list nav dense>
       <v-list-item-group
         v-model="group"
         active-class="deep-purple--text text--accent-2"
       >
-        <v-list-item @click="goRoute('Home', 'Inicio')">
+        <v-list-item
+          @click="goRoute('Home', 'Inicio')"
+          v-if="isAdmin || isSeller || isStorekeeper"
+        >
           <v-list-item-title>Inicio</v-list-item-title>
           <v-list-item-icon>
             <v-icon>mdi-home</v-icon>
           </v-list-item-icon>
         </v-list-item>
-        <v-list-group no-action sub-group>
+        <v-list-group no-action sub-group v-if="isAdmin || isStorekeeper">
           <template v-slot:activator>
             <v-list-item-content>
               <v-list-item-title>Almacén</v-list-item-title>
@@ -35,7 +39,7 @@
           </v-list-item>
         </v-list-group>
 
-        <v-list-group no-action sub-group>
+        <v-list-group no-action sub-group v-if="isAdmin || isStorekeeper">
           <template v-slot:activator>
             <v-list-item-content>
               <v-list-item-title>Compras</v-list-item-title>
@@ -54,7 +58,7 @@
           </v-list-item>
         </v-list-group>
 
-        <v-list-group no-action sub-group>
+        <v-list-group no-action sub-group v-if="isAdmin || isSeller">
           <template v-slot:activator>
             <v-list-item-content>
               <v-list-item-title>Ventas</v-list-item-title>
@@ -73,7 +77,7 @@
           </v-list-item>
         </v-list-group>
 
-        <v-list-group no-action sub-group>
+        <v-list-group no-action sub-group v-if="isAdmin">
           <template v-slot:activator>
             <v-list-item-content>
               <v-list-item-title>Accesos</v-list-item-title>
@@ -92,7 +96,11 @@
           </v-list-item>
         </v-list-group>
 
-        <v-list-group no-action sub-group>
+        <v-list-group
+          no-action
+          sub-group
+          v-if="isAdmin || isSeller || isStorekeeper"
+        >
           <template v-slot:activator>
             <v-list-item-content>
               <v-list-item-title>Estadísticas</v-list-item-title>
@@ -118,6 +126,24 @@
 <script>
 export default {
   name: 'Sidebar',
+  props: {
+    isLogged: {
+      type: Boolean,
+      required: true,
+    },
+    isAdmin: {
+      type: Boolean,
+      required: true,
+    },
+    isSeller: {
+      type: Boolean,
+      required: true,
+    },
+    isStorekeeper: {
+      type: Boolean,
+      required: true,
+    },
+  },
   data: () => ({
     group: null,
     warehouseItems: [

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import store from '../store'
 
 Vue.use(VueRouter)
 
@@ -8,17 +8,42 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home,
-  },
-  {
-    path: '/account',
-    name: 'Account',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () =>
-      import(/* webpackChunkName: "account" */ '../views/Account.vue'),
+      import(/* webpackChunkName: "login" */ '../views/Home.vue'),
+    meta: {
+      requiresAuth: true,
+      admin: true,
+      storekeeper: true,
+      seller: true,
+    },
   },
+  {
+    path: '/login',
+    name: 'Login',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () =>
+      import(/* webpackChunkName: "login" */ '../views/Login.vue'),
+  },
+  // {
+  //   path: '/account',
+  //   name: 'Account',
+  //   // route level code-splitting
+  //   // this generates a separate chunk (about.[hash].js) for this route
+  //   // which is lazy-loaded when the route is visited.
+  //   component: () =>
+  //     import(/* webpackChunkName: "account" */ '../views/Account.vue'),
+  //   meta: {
+  //     requiresAuth: true,
+  //     admin: true,
+  //     storekeeper: true,
+  //     seller: true,
+  //   },
+  // },
   {
     path: '/categories',
     name: 'Categories',
@@ -27,89 +52,148 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "categories" */ '../views/Categories.vue'),
+    meta: {
+      requiresAuth: true,
+      admin: true,
+      storekeeper: true,
+    },
   },
-  {
-    path: '/articles',
-    name: 'Articles',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "articles" */ '../views/Articles.vue'),
-  },
-  {
-    path: '/enters',
-    name: 'Enters',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "enters" */ '../views/Enters.vue'),
-  },
-  {
-    path: '/providers',
-    name: 'Providers',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "providers" */ '../views/Providers.vue'),
-  },
-  {
-    path: '/sales',
-    name: 'Sales',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "sales" */ '../views/Sales.vue'),
-  },
-  {
-    path: '/clients',
-    name: 'Clients',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "clients" */ '../views/Clients.vue'),
-  },
-  {
-    path: '/users',
-    name: 'Users',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "users" */ '../views/Users.vue'),
-  },
-  {
-    path: '/purchasesInsights',
-    name: 'PurchasesInsights',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(
-        /* webpackChunkName: "purchasesInsights" */ '../views/PurchasesInsights.vue'
-      ),
-  },
-  {
-    path: '/salesInsights',
-    name: 'SalesInsights',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(
-        /* webpackChunkName: "salesInsights" */ '../views/SalesInsights.vue'
-      ),
-  },
+  // {
+  //   path: '/articles',
+  //   name: 'Articles',
+  //   // route level code-splitting
+  //   // this generates a separate chunk (about.[hash].js) for this route
+  //   // which is lazy-loaded when the route is visited.
+  //   component: () =>
+  //     import(/* webpackChunkName: "articles" */ '../views/Articles.vue'),
+  // },
+  // {
+  //   path: '/enters',
+  //   name: 'Enters',
+  //   // route level code-splitting
+  //   // this generates a separate chunk (about.[hash].js) for this route
+  //   // which is lazy-loaded when the route is visited.
+  //   component: () =>
+  //     import(/* webpackChunkName: "enters" */ '../views/Enters.vue'),
+  // },
+  // {
+  //   path: '/providers',
+  //   name: 'Providers',
+  //   // route level code-splitting
+  //   // this generates a separate chunk (about.[hash].js) for this route
+  //   // which is lazy-loaded when the route is visited.
+  //   component: () =>
+  //     import(/* webpackChunkName: "providers" */ '../views/Providers.vue'),
+  // },
+  // {
+  //   path: '/sales',
+  //   name: 'Sales',
+  //   // route level code-splitting
+  //   // this generates a separate chunk (about.[hash].js) for this route
+  //   // which is lazy-loaded when the route is visited.
+  //   component: () =>
+  //     import(/* webpackChunkName: "sales" */ '../views/Sales.vue'),
+  //     meta: {
+  //       requiresAuth: true,
+  //       admin: true,
+  //       seller: true,
+  //     },
+  // },
+  // {
+  //   path: '/clients',
+  //   name: 'Clients',
+  //   // route level code-splitting
+  //   // this generates a separate chunk (about.[hash].js) for this route
+  //   // which is lazy-loaded when the route is visited.
+  //   component: () =>
+  //     import(/* webpackChunkName: "clients" */ '../views/Clients.vue'),
+  // },
+  // {
+  //   path: '/users',
+  //   name: 'Users',
+  //   // route level code-splitting
+  //   // this generates a separate chunk (about.[hash].js) for this route
+  //   // which is lazy-loaded when the route is visited.
+  //   component: () =>
+  //     import(/* webpackChunkName: "users" */ '../views/Users.vue'),
+  // },
+  // {
+  //   path: '/purchasesInsights',
+  //   name: 'PurchasesInsights',
+  //   // route level code-splitting
+  //   // this generates a separate chunk (about.[hash].js) for this route
+  //   // which is lazy-loaded when the route is visited.
+  //   component: () =>
+  //     import(
+  //       /* webpackChunkName: "purchasesInsights" */ '../views/PurchasesInsights.vue'
+  //     ),
+  // },
+  // {
+  //   path: '/salesInsights',
+  //   name: 'SalesInsights',
+  //   // route level code-splitting
+  //   // this generates a separate chunk (about.[hash].js) for this route
+  //   // which is lazy-loaded when the route is visited.
+  //   component: () =>
+  //     import(
+  //       /* webpackChunkName: "salesInsights" */ '../views/SalesInsights.vue'
+  //     ),
+  // },
 ]
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes,
+})
+
+router.beforeEach((to, from, next) => {
+  let user = store.state.user
+  // if (user === null) user = false
+  let adminAuth = user && user?.role === 'Admin'
+  let sellerAuth = user && user?.role === 'Seller'
+  let storekeeperAuth = user && user?.role === 'Storekeeper'
+
+  // console.log('adminAuth', adminAuth)
+  // console.log('sellerAuth', sellerAuth)
+  // console.log('store.state.user', store.state.user)
+  // if (user) console.log('store.state.user.role', store.state.user.role)
+  // console.log('storekeeperAuth', storekeeperAuth)
+  // console.log('to.path', to.path)
+
+  if (to.path !== '/login') {
+    console.log('if')
+    // next('/login')
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+      console.log('if dentro del if')
+      if (adminAuth) {
+        console.log('if admin')
+        if (to.matched.some(record => record.meta.admin)) {
+          next()
+        }
+      } else if (sellerAuth) {
+        console.log('if seller')
+        if (to.matched.some(record => record.meta.seller)) {
+          next()
+        }
+      } else if (storekeeperAuth) {
+        console.log('if storekeeper')
+
+        if (to.matched.some(record => record.meta.storekeeper)) {
+          next()
+        }
+      } else {
+        console.log('else dentro del if 1')
+        next('/login')
+      }
+    } else {
+      console.log('else dentro del if 2')
+      next('/login')
+    }
+  } else {
+    console.log('else')
+    next()
+  }
 })
 
 export default router
