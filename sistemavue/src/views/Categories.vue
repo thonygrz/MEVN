@@ -179,7 +179,9 @@ export default {
   methods: {
     async getCategorias() {
       try {
-        const res = await axios.get('category/list')
+        let header = { Token: this.$store.state.token }
+        let config = { headers: header }
+        const res = await axios.get('category/list', config)
         this.categorias = res.data
         console.log(this.categorias)
       } catch (error) {
@@ -214,9 +216,15 @@ export default {
 
     async deactivateItemConfirm() {
       try {
-        await axios.put('/category/deactivate', {
-          _id: this._id,
-        })
+        let header = { Token: this.$store.state.token }
+        let config = { headers: header }
+        await axios.put(
+          '/category/deactivate',
+          {
+            _id: this._id,
+          },
+          config
+        )
         this.clean()
         this.close()
         this.getCategorias()
@@ -228,9 +236,15 @@ export default {
 
     async activateItemConfirm() {
       try {
-        await axios.put('/category/activate', {
-          _id: this._id,
-        })
+        let header = { Token: this.$store.state.token }
+        let config = { headers: header }
+        await axios.put(
+          '/category/activate',
+          {
+            _id: this._id,
+          },
+          config
+        )
         this.clean()
         this.close()
         this.getCategorias()
@@ -267,11 +281,17 @@ export default {
         // se edita
         if (this.$refs.form.validate()) {
           try {
-            await axios.put('/category/update', {
-              _id: this._id,
-              name: this.nombre,
-              description: this.descripcion,
-            })
+            let header = { Token: this.$store.state.token }
+            let config = { headers: header }
+            await axios.put(
+              '/category/update',
+              {
+                _id: this._id,
+                name: this.nombre,
+                description: this.descripcion,
+              },
+              config
+            )
             this.clean()
             this.close()
             this.getCategorias()
@@ -284,10 +304,16 @@ export default {
         // se guarda el nuevo item
         if (this.$refs.form.validate()) {
           try {
-            await axios.post('/category/add', {
-              name: this.nombre,
-              description: this.descripcion,
-            })
+            let header = { Token: this.$store.state.token }
+            let config = { headers: header }
+            await axios.post(
+              '/category/add',
+              {
+                name: this.nombre,
+                description: this.descripcion,
+              },
+              config
+            )
             this.clean()
             this.close()
             this.getCategorias()
