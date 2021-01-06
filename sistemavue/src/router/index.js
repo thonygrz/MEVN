@@ -11,8 +11,7 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "login" */ '../views/Home.vue'),
+    component: () => import(/* webpackChunkName: "Home" */ '../views/Home.vue'),
     meta: {
       requiresAuth: true,
       admin: true,
@@ -154,44 +153,27 @@ router.beforeEach((to, from, next) => {
   let sellerAuth = user && user?.role === 'Seller'
   let storekeeperAuth = user && user?.role === 'Storekeeper'
 
-  // console.log('adminAuth', adminAuth)
-  // console.log('sellerAuth', sellerAuth)
-  // console.log('store.state.user', store.state.user)
-  // if (user) console.log('store.state.user.role', store.state.user.role)
-  // console.log('storekeeperAuth', storekeeperAuth)
-  // console.log('to.path', to.path)
-
   if (to.path !== '/login') {
-    console.log('if')
-    // next('/login')
     if (to.matched.some(record => record.meta.requiresAuth)) {
-      console.log('if dentro del if')
       if (adminAuth) {
-        console.log('if admin')
         if (to.matched.some(record => record.meta.admin)) {
           next()
         }
       } else if (sellerAuth) {
-        console.log('if seller')
         if (to.matched.some(record => record.meta.seller)) {
           next()
         }
       } else if (storekeeperAuth) {
-        console.log('if storekeeper')
-
         if (to.matched.some(record => record.meta.storekeeper)) {
           next()
         }
       } else {
-        console.log('else dentro del if 1')
         next('/login')
       }
     } else {
-      console.log('else dentro del if 2')
       next('/login')
     }
   } else {
-    console.log('else')
     next()
   }
 })
