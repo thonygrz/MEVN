@@ -144,7 +144,7 @@ export default {
             message: "Password incorrecto",
           });
       } else {
-        res.status(400).send({
+        res.status(404).send({
           message: "No existe el usuario o no está activo.",
         });
       }

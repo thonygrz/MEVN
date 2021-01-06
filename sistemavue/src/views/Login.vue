@@ -13,12 +13,16 @@
               <v-text-field
                 v-model="password"
                 required
+                type="password"
                 :rules="[rules.required]"
               >
               </v-text-field>
+              <p v-show="showErrorMessage" class="red--text">
+                {{ errorMessage }}
+              </p>
             </v-card-text>
             <v-card-actions>
-              <v-btn color="secondary" block @click="login"
+              <v-btn :loading="load" color="secondary" block @click="login"
                 >Iniciar sesión</v-btn
               >
             </v-card-actions>
@@ -38,9 +42,13 @@ export default {
     rules: {
       required: value => !!value || 'Campo requerido',
     },
+    showErrorMessage: false,
+    errorMessage: '',
+    load: false,
   }),
   methods: {
     async login() {
+      this.load = true
       if (this.$refs.form.validate()) {
         try {
           let res = await axios.post('user/login', {
@@ -49,8 +57,19 @@ export default {
           })
           this.$store.dispatch('guardarToken', res.data.tokenReturn)
           this.$router.push({ name: 'Home' })
+          this.showErrorMessage = false
+          this.load = false
         } catch (error) {
           console.log(error.message)
+          if (error.response && error.response.status === 404) {
+            this.showErrorMessage = true
+            this.errorMessage = 'Credenciales inválidas.'
+            this.load = false
+          } else {
+            this.showErrorMessage = true
+            this.errorMessage = 'Ocurrió un error con el servidor.'
+            this.load = false
+          }
         }
       }
     },
