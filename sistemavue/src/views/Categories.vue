@@ -183,7 +183,6 @@ export default {
         let config = { headers: header }
         const res = await axios.get('category/list', config)
         this.categorias = res.data
-        console.log(this.categorias)
       } catch (error) {
         console.log(error)
       }
