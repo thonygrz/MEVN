@@ -120,6 +120,13 @@
         </v-list-group>
       </v-list-item-group>
     </v-list>
+    <template v-slot:append>
+      <div class="pa-2">
+        <v-btn @click="logout" color="secondary" block>
+          Cerrar sesión
+        </v-btn>
+      </div>
+    </template>
   </v-navigation-drawer>
 </template>
 
@@ -171,6 +178,9 @@ export default {
     },
     setCurrentSectionName(sectionName) {
       this.$emit('setSectionName', sectionName)
+    },
+    logout() {
+      this.$store.dispatch('salir')
     },
   },
 }
