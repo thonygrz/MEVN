@@ -19,7 +19,7 @@
             justify="center"
           ></v-text-field>
           <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="500px">
+          <v-dialog v-model="dialog" max-width="600px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
                 Nuevo Item
@@ -33,7 +33,7 @@
                 <v-card-text>
                   <v-container>
                     <v-row>
-                      <v-col cols="12" sm="12">
+                      <v-col cols="12" sm="6">
                         <v-text-field
                           v-model="nombre"
                           label="Nombre"
@@ -41,10 +41,55 @@
                           :rules="[rules.required, rules.min]"
                         ></v-text-field>
                       </v-col>
+                      <v-col cols="12" sm="6">
+                        <v-combobox
+                          v-model="rol"
+                          label="Rol"
+                          :items="roles"
+                          :rules="[rules.required]"
+                        ></v-combobox>
+                      </v-col>
+                      <v-col cols="12" sm="4">
+                        <v-combobox
+                          v-model="tipoDocumento"
+                          label="Tipo Doc"
+                          :items="tiposDocumento"
+                          :rules="[rules.required]"
+                        ></v-combobox>
+                      </v-col>
+                      <v-col cols="12" sm="4">
+                        <v-text-field
+                          v-model="numDoc"
+                          label="Número de documento"
+                          :rules="[rules.required]"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="4">
+                        <v-text-field
+                          v-model="tlf"
+                          label="Número de teléfono"
+                          :rules="[rules.required]"
+                        ></v-text-field>
+                      </v-col>
                       <v-col cols="12" sm="12">
                         <v-text-field
-                          v-model="descripcion"
-                          label="Descripción"
+                          v-model="direccion"
+                          label="Dirección"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="6">
+                        <v-text-field
+                          v-model="email"
+                          label="Correo"
+                          :rules="[rules.required]"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="6">
+                        <v-text-field
+                          type="password"
+                          v-model="password"
+                          label="Contraseña"
+                          :rules="[rules.required]"
                         ></v-text-field>
                       </v-col>
                     </v-row>
@@ -149,7 +194,15 @@ export default {
     usuarios: [],
     _id: '',
     nombre: '',
-    descripcion: '',
+    tipoDocumento: '',
+    direccion: '',
+    numDoc: '',
+    tlf: '',
+    email: '',
+    password: '',
+    rol: '',
+    roles: ['Admin', 'Storekeeper', 'Seller'],
+    tiposDocumento: ['V', 'J', 'E'],
     rules: {
       required: value => !!value || 'Campo requerido',
       min: v =>
@@ -200,7 +253,13 @@ export default {
     editItem(item) {
       this._id = item._id
       this.nombre = item.name
-      this.descripcion = item.description
+      this.rol = item.role
+      this.tipoDocumento = item.documentType
+      this.numDoc = item.documentNumber
+      this.tlf = item.phoneNumber
+      this.direccion = item.address
+      this.email = item.email
+      this.password = item.password
       this.editedIndex = 1
       this.dialog = true
     },
@@ -260,6 +319,7 @@ export default {
     close() {
       this.dialog = false
       this.$refs.form.resetValidation()
+      this.clean()
       this.$nextTick(() => {
         this.editedIndex = -1
       })
@@ -277,6 +337,13 @@ export default {
       this._id = ''
       this.nombre = ''
       this.descripcion = ''
+      this.rol = ''
+      this.tipoDocumento = ''
+      this.numDoc = ''
+      this.direccion = ''
+      this.tlf = ''
+      this.email = ''
+      this.password = ''
     },
 
     async save() {
@@ -291,7 +358,13 @@ export default {
               {
                 _id: this._id,
                 name: this.nombre,
-                description: this.descripcion,
+                role: this.rol,
+                documentType: this.tipoDocumento,
+                documentNumber: this.numDoc,
+                address: this.direccion,
+                phoneNumber: this.tlf,
+                email: this.email,
+                password: this.password,
               },
               config
             )
@@ -310,10 +383,16 @@ export default {
             let header = { Token: this.$store.state.token }
             let config = { headers: header }
             await axios.post(
-              '/category/add',
+              '/user/add',
               {
                 name: this.nombre,
-                description: this.descripcion,
+                role: this.rol,
+                documentType: this.tipoDocumento,
+                documentNumber: this.numDoc,
+                address: this.direccion,
+                phoneNumber: this.tlf,
+                email: this.email,
+                password: this.password,
               },
               config
             )
