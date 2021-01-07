@@ -103,15 +103,20 @@ const routes = [
   //       seller: true,
   //     },
   // },
-  // {
-  //   path: '/clients',
-  //   name: 'Clients',
-  //   // route level code-splitting
-  //   // this generates a separate chunk (about.[hash].js) for this route
-  //   // which is lazy-loaded when the route is visited.
-  //   component: () =>
-  //     import(/* webpackChunkName: "clients" */ '../views/Clients.vue'),
-  // },
+  {
+    path: '/clients',
+    name: 'Clients',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () =>
+      import(/* webpackChunkName: "clients" */ '../views/Clients.vue'),
+    meta: {
+      requiresAuth: true,
+      admin: true,
+      seller: true,
+    },
+  },
   {
     path: '/users',
     name: 'Users',
