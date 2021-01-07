@@ -37,7 +37,7 @@
                         <v-text-field
                           v-model="codigo"
                           label="Código"
-                          :rules="[rules.required]"
+                          :rules="[rules.required, rules.minCod]"
                         ></v-text-field>
                       </v-col>
                       <v-col cols="12" sm="6">
@@ -47,6 +47,13 @@
                           :items="categorias"
                           :rules="[rules.required]"
                         ></v-combobox>
+                      </v-col>
+                      <v-col cols="12" sm="12">
+                        <v-text-field
+                          v-model="nombre"
+                          label="Nombre"
+                          :rules="[rules.required, rules.min]"
+                        ></v-text-field>
                       </v-col>
                       <v-col cols="12" sm="6">
                         <v-text-field
@@ -62,13 +69,7 @@
                           :rules="[rules.required]"
                         ></v-text-field>
                       </v-col>
-                      <v-col cols="12" sm="12">
-                        <v-text-field
-                          v-model="nombre"
-                          label="Nombre"
-                          :rules="[rules.required, rules.min]"
-                        ></v-text-field>
-                      </v-col>
+
                       <v-col cols="12" sm="12">
                         <v-text-field
                           v-model="descripcion"
@@ -178,6 +179,7 @@ export default {
     _id: '',
     nombre: '',
     categoria: '',
+    categorias: [],
     codigo: '',
     descripcion: '',
     precioVenta: '',
@@ -189,6 +191,9 @@ export default {
       min: v =>
         (v && v.length >= 1 && v.length <= 53) ||
         'El nombre debe estar entre 1 y 50 caracteres',
+      minCod: v =>
+        (v && v.length >= 1 && v.length <= 64) ||
+        'El nombre debe estar entre 1 y 64 caracteres',
     },
     valid: false,
     item: null,
@@ -212,6 +217,7 @@ export default {
 
   created() {
     this.getArticulos()
+    this.getCategorias()
   },
 
   methods: {
@@ -225,22 +231,43 @@ export default {
         console.log(error)
       }
     },
+    async getCategorias() {
+      try {
+        let header = { Token: this.$store.state.token }
+        let config = { headers: header }
+        const res = await axios.get('category/list', config)
+        let arrayCategorias = res.data
+        this.categorias = arrayCategorias.map(x => {
+          return {
+            value: x._id,
+            text: x.name,
+          }
+        })
+      } catch (error) {
+        console.log(error)
+      }
+    },
     statusName(status) {
       if (status === 1) return 'Activo'
       else if (status === 0) return 'Desactivado'
       else return 'Estado desconocido'
     },
 
+    transformarCategoria(cat) {
+      return {
+        value: cat._id,
+        text: cat.name,
+      }
+    },
+
     editItem(item) {
       this._id = item._id
       this.nombre = item.name
-      this.rol = item.role
-      this.tipoDocumento = item.documentType
-      this.numDoc = item.documentNumber
-      this.tlf = item.phoneNumber
-      this.direccion = item.address
-      this.email = item.email
-      this.password = item.password
+      this.descripcion = item.description
+      this.codigo = item.code
+      this.precioVenta = item.sellingPrice
+      this.stock = item.stock
+      this.categoria = this.transformarCategoria(item.category)
       this.editedIndex = 1
       this.dialog = true
     },
@@ -271,6 +298,7 @@ export default {
         this.clean()
         this.close()
         this.getArticulos()
+        this.getCategorias()
       } catch (error) {
         console.log(error)
       }
@@ -291,6 +319,7 @@ export default {
         this.clean()
         this.close()
         this.getArticulos()
+        this.getCategorias()
       } catch (error) {
         console.log(error)
       }
@@ -318,14 +347,15 @@ export default {
       this._id = ''
       this.nombre = ''
       this.descripcion = ''
-      this.rol = ''
-      this.tipoDocumento = ''
-      this.numDoc = ''
-      this.direccion = ''
-      this.tlf = ''
-      this.email = ''
-      this.password = ''
+      this.codigo = ''
+      this.precioVenta = ''
+      this.stock = ''
+      this.categoria = ''
     },
+
+    // lookForCategory(name){
+    //   return
+    // }
 
     async save() {
       if (this.editedIndex === 1) {
@@ -339,19 +369,18 @@ export default {
               {
                 _id: this._id,
                 name: this.nombre,
-                role: this.rol,
-                documentType: this.tipoDocumento,
-                documentNumber: this.numDoc,
-                address: this.direccion,
-                phoneNumber: this.tlf,
-                email: this.email,
-                password: this.password,
+                code: this.codigo,
+                description: this.descripcion,
+                sellingPrice: this.precioVenta,
+                stock: this.stock,
+                category: this.categoria.value,
               },
               config
             )
             this.clean()
             this.close()
             this.getArticulos()
+            this.getCategorias()
           } catch (error) {
             console.log(error)
           }
@@ -367,19 +396,18 @@ export default {
               '/article/add',
               {
                 name: this.nombre,
-                role: this.rol,
-                documentType: this.tipoDocumento,
-                documentNumber: this.numDoc,
-                address: this.direccion,
-                phoneNumber: this.tlf,
-                email: this.email,
-                password: this.password,
+                code: this.codigo,
+                description: this.descripcion,
+                sellingPrice: this.precioVenta,
+                stock: this.stock,
+                category: this.categoria.value,
               },
               config
             )
             this.clean()
             this.close()
             this.getArticulos()
+            this.getCategorias()
           } catch (error) {
             console.log(error)
           }
