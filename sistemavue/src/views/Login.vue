@@ -8,13 +8,19 @@
           </v-card-title>
           <v-form ref="form">
             <v-card-text>
-              <v-text-field v-model="user" required :rules="[rules.required]">
+              <v-text-field
+                @keyup.enter="login"
+                v-model="user"
+                required
+                :rules="[rules.required]"
+              >
               </v-text-field>
               <v-text-field
                 v-model="password"
                 required
                 type="password"
                 :rules="[rules.required]"
+                @keyup.enter="login"
               >
               </v-text-field>
               <p v-show="showErrorMessage" class="red--text">

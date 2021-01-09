@@ -71,15 +71,21 @@ const routes = [
       storekeeper: true,
     },
   },
-  // {
-  //   path: '/enters',
-  //   name: 'Enters',
-  //   // route level code-splitting
-  //   // this generates a separate chunk (about.[hash].js) for this route
-  //   // which is lazy-loaded when the route is visited.
-  //   component: () =>
-  //     import(/* webpackChunkName: "enters" */ '../views/Enters.vue'),
-  // },
+  {
+    path: '/enters',
+    name: 'Enters',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () =>
+      import(/* webpackChunkName: "enters" */ '../views/Enters.vue'),
+    meta: {
+      requiresAuth: true,
+      admin: true,
+      storekeeper: true,
+      seller: true,
+    },
+  },
   // {
   //   path: '/providers',
   //   name: 'Providers',
