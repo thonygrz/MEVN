@@ -20,14 +20,7 @@
             justify="center"
           ></v-text-field>
           <v-spacer></v-spacer>
-          <v-btn
-            color="primary"
-            dark
-            class="mb-2"
-            v-bind="attrs"
-            v-on="on"
-            @click="changeNewEnter"
-          >
+          <v-btn color="primary" dark class="mb-2" @click="changeNewEnter">
             Nuevo Item
           </v-btn>
 
@@ -132,11 +125,68 @@
         ></v-text-field>
       </v-col>
       <v-col cols="12" sm="1">
-        <v-btn class="mx-2" fab dark small color="teal">
+        <v-btn
+          @click="changeArticuloDialog"
+          class="mx-2"
+          fab
+          dark
+          small
+          color="teal"
+        >
           <v-icon dark>
             mdi-format-list-bulleted-square
           </v-icon>
         </v-btn>
+        <v-dialog v-model="articuloDialog" max-width="1000px">
+          <v-card>
+            <v-card-title>
+              <span class="headline">{{ formTitle }}</span>
+            </v-card-title>
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col cols="12" sm="12">
+                    <v-text-field
+                      v-model="searchArticulo"
+                      prepend-icon="mdi-magnify"
+                      label="Buscar"
+                      single-line
+                      hide-details
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="12">
+                    <v-data-table
+                      :headers="headers3"
+                      :items="articulosDialog"
+                      hide-default-footer
+                      class="elevation-1"
+                      :loading="loadDialog"
+                      loading-text="Buscando artículos... por favor espere."
+                    >
+                      <template v-slot:item.add="{ item }">
+                        <v-icon small @click="agregarDetalle(item)">
+                          mdi-plus-thick
+                        </v-icon>
+                      </template>
+                      <template v-slot:item.status="{ item }">
+                        <v-chip :color="getColor(item.status)" dark>
+                          {{ statusName(item.status) }}
+                        </v-chip>
+                      </template>
+                    </v-data-table>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" text @click="close">
+                Cancelar
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-col>
       <v-col cols="12" sm="7">
         <p v-show="errorCodeMessage" class="red--text">
@@ -156,17 +206,22 @@
               mdi-delete
             </v-icon>
           </template>
-          <template v-slot:no-data>
-            <v-btn color="primary" @click="getIngresos">
-              Reset
-            </v-btn>
+
+          <template v-slot:item.quantity="{ item }">
+            <v-text-field v-model="item.quantity" type="number"></v-text-field>
           </template>
-          <template v-slot:item.status="{ item }">
-            <v-chip :color="getColor(item.status)" dark>
-              {{ statusName(item.status) }}
-            </v-chip>
+          <template v-slot:item.price="{ item }">
+            <v-text-field v-model="item.price" type="number"></v-text-field>
+          </template>
+          <template v-slot:item.subtotal="{ item }">
+            <p>${{ item.price * item.quantity }}</p>
           </template>
         </v-data-table>
+      </v-col>
+      <v-col cols="12" sm="12">
+        <p class="d-flex justify-end ma-0">$ {{ totalParcial }}</p>
+        <p class="d-flex justify-end ma-0">$ {{ totalImpuesto }}</p>
+        <p class="d-flex justify-end ma-0">$ {{ totalNeto }}</p>
       </v-col>
       <v-col cols="12" sm="4">
         <v-btn @click="changeNewEnter" class="mx-2" dark small color="grey">
@@ -189,6 +244,7 @@ export default {
     search: '',
     dialog: false,
     dialogDelete: false,
+    articuloDialog: false,
     headers: [
       { text: 'Acciones', value: 'actions', sortable: false },
       { text: 'Usuario', value: 'user.name' },
@@ -208,21 +264,18 @@ export default {
       { text: 'Precio', value: 'price', align: 'center', sortable: false },
       { text: 'SubTotal', value: 'subtotal', align: 'center', sortable: false },
     ],
-    articulos: [
-      // {
-      //   name: 'Articulo 1',
-      //   quantity: 10,
-      //   price: 35,
-      //   subtotal: 40,
-      // },
-      // {
-      //   name: 'Articulo 2',
-      //   quantity: 5,
-      //   price: 75,
-      //   subtotal: 90,
-      // },
+    headers3: [
+      { text: 'Agregar', value: 'add', sortable: false, align: 'center' },
+      { text: 'Nombre', value: 'name' },
+      { text: 'Descripción', value: 'description' },
+      { text: 'Precio de venta', value: 'sellingPrice' },
+      { text: 'Stock', value: 'stock' },
+      { text: 'Código', value: 'code' },
+      { text: 'Categoría', value: 'category.name' },
+      { text: 'Estado', value: 'status', align: 'center' },
     ],
-
+    articulos: [],
+    articulosDialog: [],
     proveedores: [],
     codigo: '',
     tiposComprobante: ['FACTURA', 'BOLETA'],
@@ -240,8 +293,6 @@ export default {
     serieComprobante: '',
     numComprobante: '',
     proveedor: '',
-    impuesto: '',
-
     rules: {
       required: value => !!value || 'Campo requerido',
       min: v =>
@@ -254,11 +305,27 @@ export default {
     newEnter: false,
     errorCodeMessage: false,
     errorMessage: 'error',
+    impuesto: 0.18,
+    formTitle: 'Añadir artículos',
+    searchArticulo: '',
+    loadDialog: false,
   }),
 
   computed: {
-    formTitle() {
-      return this.editedIndex === -1 ? 'Nueva categoría' : 'Editar categoría'
+    totalParcial() {
+      let total = 0
+      this.articulos.forEach(el => {
+        total += el.price * el.quantity
+      })
+      return total.toFixed(2)
+    },
+    totalImpuesto() {
+      return (this.totalParcial * this.impuesto).toFixed(2)
+    },
+    totalNeto() {
+      return (
+        parseFloat(this.totalParcial) + parseFloat(this.totalImpuesto)
+      ).toFixed(2)
     },
   },
 
@@ -269,6 +336,10 @@ export default {
     dialogDelete(val) {
       val || this.closeDelete()
     },
+    searchArticulo() {
+      this.loadDialog = true
+      this.getArticulos()
+    },
   },
 
   created() {
@@ -277,6 +348,20 @@ export default {
   },
 
   methods: {
+    async getArticulos() {
+      try {
+        let header = { Token: this.$store.state.token }
+        let config = { headers: header }
+        const res = await axios.get(
+          'article/list?keyword=' + this.searchArticulo,
+          config
+        )
+        this.articulosDialog = res.data
+      } catch (error) {
+        console.log(error)
+      }
+      this.loadDialog = false
+    },
     async getIngresos() {
       try {
         let header = { Token: this.$store.state.token }
@@ -426,11 +511,8 @@ export default {
     },
 
     close() {
-      this.dialog = false
-      this.$refs.form.resetValidation()
-      this.$nextTick(() => {
-        this.editedIndex = -1
-      })
+      this.articuloDialog = false
+      this.searchArticulo = ''
     },
 
     closeDelete() {
@@ -504,6 +586,10 @@ export default {
 
     changeNewEnter() {
       this.newEnter = !this.newEnter
+    },
+
+    changeArticuloDialog() {
+      this.articuloDialog = !this.articuloDialog
     },
   },
 }
