@@ -124,11 +124,10 @@
           :rules="[rules.required, rules.min]"
         ></v-text-field>
       </v-col>
-      <v-col cols="12" sm="8">
+      <v-col cols="12" sm="4">
         <v-text-field
           v-model="codigo"
           label="Código"
-          :rules="[rules.required, rules.min]"
           @keyup.enter="buscarCodigo"
         ></v-text-field>
       </v-col>
@@ -139,9 +138,9 @@
           </v-icon>
         </v-btn>
       </v-col>
-      <v-col cols="12" sm="3">
+      <v-col cols="12" sm="7">
         <p v-show="errorCodeMessage" class="red--text">
-          El código ingresado no pertenece a ningún artículo
+          {{ errorMessage }}
         </p>
       </v-col>
 
@@ -153,7 +152,7 @@
           class="elevation-1"
         >
           <template v-slot:item.actions="{ item }">
-            <v-icon small @click="deactivateItem(item)">
+            <v-icon small @click="removeArticle(item)">
               mdi-delete
             </v-icon>
           </template>
@@ -210,19 +209,20 @@ export default {
       { text: 'SubTotal', value: 'subtotal', align: 'center', sortable: false },
     ],
     articulos: [
-      {
-        name: 'Articulo 1',
-        quantity: 10,
-        price: 35,
-        subtotal: 40,
-      },
-      {
-        name: 'Articulo 2',
-        quantity: 5,
-        price: 75,
-        subtotal: 90,
-      },
+      // {
+      //   name: 'Articulo 1',
+      //   quantity: 10,
+      //   price: 35,
+      //   subtotal: 40,
+      // },
+      // {
+      //   name: 'Articulo 2',
+      //   quantity: 5,
+      //   price: 75,
+      //   subtotal: 90,
+      // },
     ],
+
     proveedores: [],
     codigo: '',
     tiposComprobante: ['FACTURA', 'BOLETA'],
@@ -253,6 +253,7 @@ export default {
     actionType: null,
     newEnter: false,
     errorCodeMessage: false,
+    errorMessage: 'error',
   }),
 
   computed: {
@@ -306,6 +307,38 @@ export default {
       }
     },
 
+    encontrarArticulo(id) {
+      let booly = this.articulos.some(x => x._id === id)
+      console.log('find: ', booly)
+      return booly
+    },
+
+    removeFromArray(arr, item) {
+      let index = arr.indexOf(item)
+      if (index != -1) {
+        arr.splice(index, 1)
+      }
+    },
+
+    removeArticle(item) {
+      this.removeFromArray(this.articulos, item)
+    },
+
+    agregarDetalle(data) {
+      if (!this.encontrarArticulo(data._id)) {
+        this.articulos.push({
+          _id: data._id,
+          name: data.name,
+          quantity: 1,
+          price: data.sellingPrice,
+        })
+      } else {
+        this.errorCodeMessage = true
+        this.errorMessage = 'El artículo ya fue ingresado.'
+        console.log('ya se agregó el articulo')
+      }
+    },
+
     async buscarCodigo() {
       try {
         let header = { Token: this.$store.state.token }
@@ -313,10 +346,14 @@ export default {
         const res = await axios.get('article/query?code=' + this.codigo, config)
         console.log(res.data)
         this.errorCodeMessage = false
+        this.agregarDetalle(res.data)
+        this.codigo = ''
         // this.articulo = res.data
       } catch (error) {
         console.log(error)
         if (error.response.status === 400) {
+          this.errorMessage =
+            'El código ingresado no pertenece a ningún artículo'
           this.errorCodeMessage = true
         }
       }
