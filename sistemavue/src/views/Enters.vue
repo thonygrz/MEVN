@@ -58,8 +58,8 @@
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)">
-          mdi-pencil
+        <v-icon small class="mr-2" @click="showItem(item)">
+          mdi-eye
         </v-icon>
         <v-icon v-if="item.status === 1" small @click="deactivateItem(item)">
           mdi-cancel
@@ -79,159 +79,182 @@
         </v-chip>
       </template>
     </v-data-table>
-    <v-row v-show="newEnter" class="px-16 pb-16">
-      <v-col cols="12" sm="4">
-        <v-combobox
-          v-model="tipoComprobante"
-          label="Tipo de comprobante"
-          :items="tiposComprobante"
-          :rules="[rules.required]"
-        ></v-combobox>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-text-field
-          v-model="serieComprobante"
-          label="Serie de comprobante"
-          :rules="[rules.required, rules.min]"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-text-field
-          v-model="numComprobante"
-          label="Número de comprobante"
-          :rules="[rules.required, rules.min]"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="8">
-        <v-combobox
-          v-model="proveedor"
-          label="Proveedor"
-          :items="proveedores"
-          :rules="[rules.required]"
-        ></v-combobox>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-text-field
-          v-model="impuesto"
-          label="Impuesto"
-          :rules="[rules.required, rules.min]"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-text-field
-          v-model="codigo"
-          label="Código"
-          @keyup.enter="buscarCodigo"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="1">
-        <v-btn
-          @click="changeArticuloDialog"
-          class="mx-2"
-          fab
-          dark
-          small
-          color="teal"
-        >
-          <v-icon dark>
-            mdi-format-list-bulleted-square
-          </v-icon>
-        </v-btn>
-        <v-dialog v-model="articuloDialog" max-width="1000px">
-          <v-card>
-            <v-card-title>
-              <span class="headline">{{ formTitle }}</span>
-            </v-card-title>
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col cols="12" sm="12">
-                    <v-text-field
-                      v-model="searchArticulo"
-                      prepend-icon="mdi-magnify"
-                      label="Buscar"
-                      single-line
-                      hide-details
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="12">
-                    <v-data-table
-                      :headers="headers3"
-                      :items="articulosDialog"
-                      hide-default-footer
-                      class="elevation-1"
-                      :loading="loadDialog"
-                      loading-text="Buscando artículos... por favor espere."
-                    >
-                      <template v-slot:item.add="{ item }">
-                        <v-icon small @click="agregarDetalle(item)">
-                          mdi-plus-thick
-                        </v-icon>
-                      </template>
-                      <template v-slot:item.status="{ item }">
-                        <v-chip :color="getColor(item.status)" dark>
-                          {{ statusName(item.status) }}
-                        </v-chip>
-                      </template>
-                    </v-data-table>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="close">
-                Cancelar
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-col>
-      <v-col cols="12" sm="7">
-        <p v-show="errorCodeMessage" class="red--text">
-          {{ errorMessage }}
-        </p>
-      </v-col>
-
-      <v-col cols="12" sm="12">
-        <v-data-table
-          :headers="headers2"
-          :items="articulos"
-          hide-default-footer
-          class="elevation-1"
-        >
-          <template v-slot:item.actions="{ item }">
-            <v-icon small @click="removeArticle(item)">
-              mdi-delete
+    <v-form ref="form" v-model="valid" lazy-validation>
+      <v-row v-show="newEnter" class="px-16 pb-16">
+        <v-col cols="12" sm="4">
+          <v-combobox
+            v-model="tipoComprobante"
+            label="Tipo de comprobante"
+            :items="tiposComprobante"
+            :rules="[rules.required]"
+          ></v-combobox>
+        </v-col>
+        <v-col cols="12" sm="4">
+          <v-text-field
+            v-model="serieComprobante"
+            label="Serie de comprobante"
+            :rules="[rules.required, rules.minSeries]"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="4">
+          <v-text-field
+            v-model="numComprobante"
+            label="Número de comprobante"
+            :rules="[rules.required, rules.minNum]"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="8">
+          <v-combobox
+            v-model="proveedor"
+            label="Proveedor"
+            :items="proveedores"
+            :rules="[rules.required]"
+          ></v-combobox>
+        </v-col>
+        <v-col cols="12" sm="4">
+          <v-text-field
+            v-model="impuesto"
+            label="Impuesto"
+            :rules="[rules.required]"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="4">
+          <v-text-field
+            v-model="codigo"
+            label="Código"
+            @keyup.enter="buscarCodigo"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="1">
+          <v-btn
+            @click="changeArticuloDialog"
+            class="mx-2"
+            fab
+            dark
+            small
+            color="teal"
+          >
+            <v-icon dark>
+              mdi-format-list-bulleted-square
             </v-icon>
-          </template>
+          </v-btn>
+          <v-dialog v-model="articuloDialog" max-width="1000px">
+            <v-card>
+              <v-card-title>
+                <span class="headline">{{ formTitle }}</span>
+              </v-card-title>
+              <v-card-text>
+                <v-container>
+                  <v-row>
+                    <v-col cols="12" sm="12">
+                      <v-text-field
+                        v-model="searchArticulo"
+                        prepend-icon="mdi-magnify"
+                        label="Buscar"
+                        single-line
+                        hide-details
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="12">
+                      <v-data-table
+                        :headers="headers3"
+                        :items="articulosDialog"
+                        hide-default-footer
+                        class="elevation-1"
+                        :loading="loadDialog"
+                        loading-text="Buscando artículos... por favor espere."
+                      >
+                        <template v-slot:item.add="{ item }">
+                          <v-icon small @click="agregarDetalle(item)">
+                            mdi-plus-thick
+                          </v-icon>
+                        </template>
+                        <template v-slot:item.status="{ item }">
+                          <v-chip :color="getColor(item.status)" dark>
+                            {{ statusName(item.status) }}
+                          </v-chip>
+                        </template>
+                      </v-data-table>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-card-text>
 
-          <template v-slot:item.quantity="{ item }">
-            <v-text-field v-model="item.quantity" type="number"></v-text-field>
-          </template>
-          <template v-slot:item.price="{ item }">
-            <v-text-field v-model="item.price" type="number"></v-text-field>
-          </template>
-          <template v-slot:item.subtotal="{ item }">
-            <p>${{ item.price * item.quantity }}</p>
-          </template>
-        </v-data-table>
-      </v-col>
-      <v-col cols="12" sm="12">
-        <p class="d-flex justify-end ma-0">$ {{ totalParcial }}</p>
-        <p class="d-flex justify-end ma-0">$ {{ totalImpuesto }}</p>
-        <p class="d-flex justify-end ma-0">$ {{ totalNeto }}</p>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-btn @click="changeNewEnter" class="mx-2" dark small color="grey">
-          Cancelar
-        </v-btn>
-        <v-btn class="mx-2" dark small color="green">
-          Guardar
-        </v-btn>
-      </v-col>
-    </v-row>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="close">
+                  Cancelar
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-col>
+        <v-col cols="12" sm="7">
+          <p v-show="errorCodeMessage" class="red--text">
+            {{ errorMessage }}
+          </p>
+        </v-col>
+
+        <v-col cols="12" sm="12">
+          <v-data-table
+            :headers="headers2"
+            :items="articulos"
+            hide-default-footer
+            class="elevation-1"
+          >
+            <template v-slot:item.actions="{ item }">
+              <v-icon small @click="removeArticle(item)">
+                mdi-delete
+              </v-icon>
+            </template>
+
+            <template v-slot:item.quantity="{ item }">
+              <v-text-field
+                v-model="item.quantity"
+                type="number"
+              ></v-text-field>
+            </template>
+            <template v-slot:item.price="{ item }">
+              <v-text-field v-model="item.price" type="number"></v-text-field>
+            </template>
+            <template v-slot:item.subtotal="{ item }">
+              <p>${{ item.price * item.quantity }}</p>
+            </template>
+            <template v-slot:no-data>
+              <v-alert :value="true" color="warning" icon="mdi-alert">
+                Debes añadir un artículo
+              </v-alert>
+            </template>
+          </v-data-table>
+        </v-col>
+        <v-col cols="12" sm="12">
+          <p class="d-flex justify-end ma-0">
+            <b>Total Parcial $ </b> {{ totalParcial }}
+          </p>
+          <p class="d-flex justify-end ma-0">
+            <b>Impuesto $ </b> {{ totalImpuesto }}
+          </p>
+          <p class="d-flex justify-end ma-0">
+            <b>Impuesto $ </b> {{ totalNeto }}
+          </p>
+        </v-col>
+        <v-col cols="12" sm="4">
+          <v-btn @click="closeNewEnter" class="mx-2" dark small color="grey">
+            Cancelar
+          </v-btn>
+          <v-btn
+            v-show="botonGuardar"
+            @click="save"
+            class="mx-2"
+            dark
+            small
+            color="green"
+          >
+            Guardar
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-form>
   </div>
 </template>
 
@@ -298,6 +321,12 @@ export default {
       min: v =>
         (v && v.length >= 1 && v.length <= 53) ||
         'El nombre debe estar entre 1 y 50 caracteres',
+      minSeries: v =>
+        (v && v.length >= 1 && v.length <= 7) ||
+        'El nombre debe estar entre 1 y 7 caracteres',
+      minNum: v =>
+        (v && v.length >= 1 && v.length <= 10) ||
+        'El nombre debe estar entre 1 y 10 caracteres',
     },
     valid: false,
     item: null,
@@ -309,6 +338,7 @@ export default {
     formTitle: 'Añadir artículos',
     searchArticulo: '',
     loadDialog: false,
+    botonGuardar: true,
   }),
 
   computed: {
@@ -450,12 +480,17 @@ export default {
       else return 'Estado desconocido'
     },
 
-    editItem(item) {
+    showItem(item) {
       this._id = item._id
-      this.nombre = item.name
-      this.descripcion = item.description
-      this.editedIndex = 1
-      this.dialog = true
+      this.proveedor = item.person.name
+      this.tipoComprobante = item.proofType
+      this.serieComprobante = item.proofSeries
+      this.numComprobante = item.proofNumber
+      this.impuesto = item.tax
+      this.articulos = item.details
+      this.botonGuardar = false
+
+      this.changeNewEnter()
     },
 
     deactivateItem(item) {
@@ -513,6 +548,7 @@ export default {
     close() {
       this.articuloDialog = false
       this.searchArticulo = ''
+      this.$refs.form.resetValidation()
     },
 
     closeDelete() {
@@ -527,55 +563,12 @@ export default {
       this._id = ''
       this.nombre = ''
       this.descripcion = ''
-    },
-
-    async save() {
-      if (this.editedIndex === 1) {
-        // se edita
-        if (this.$refs.form.validate()) {
-          try {
-            let header = { Token: this.$store.state.token }
-            let config = { headers: header }
-            await axios.put(
-              '/enter/update',
-              {
-                _id: this._id,
-                name: this.nombre,
-                description: this.descripcion,
-              },
-              config
-            )
-            this.clean()
-            this.close()
-            this.getIngresos()
-          } catch (error) {
-            console.log(error)
-          }
-          this.close()
-        }
-      } else {
-        // se guarda el nuevo item
-        if (this.$refs.form.validate()) {
-          try {
-            let header = { Token: this.$store.state.token }
-            let config = { headers: header }
-            await axios.post(
-              '/enter/add',
-              {
-                name: this.nombre,
-                description: this.descripcion,
-              },
-              config
-            )
-            this.clean()
-            this.close()
-            this.getIngresos()
-          } catch (error) {
-            console.log(error)
-          }
-          this.close()
-        }
-      }
+      this.proveedor = ''
+      this.tipoComprobante = ''
+      this.serieComprobante = ''
+      this.numComprobante = ''
+      this.articulos = []
+      this.$refs.form.resetValidation()
     },
 
     getColor(status) {
@@ -584,12 +577,48 @@ export default {
       else return 'black'
     },
 
+    closeNewEnter() {
+      this.clean()
+      this.changeNewEnter()
+      this.botonGuardar = true
+    },
+
     changeNewEnter() {
       this.newEnter = !this.newEnter
     },
 
     changeArticuloDialog() {
       this.articuloDialog = !this.articuloDialog
+    },
+
+    async save() {
+      if (this.$refs.form.validate() && this.articulos.length > 0) {
+        try {
+          let header = { Token: this.$store.state.token }
+          let config = { headers: header }
+          await axios.post(
+            '/enter/add',
+            {
+              user: this.$store.state.user._id,
+              person: this.proveedor.value,
+              proofType: this.tipoComprobante,
+              proofSeries: this.serieComprobante,
+              proofNumber: this.numComprobante,
+              tax: this.impuesto,
+              total: this.totalNeto,
+              details: this.articulos,
+            },
+            config
+          )
+          this.clean()
+          this.changeNewEnter()
+          this.getArticulos()
+          this.getIngresos()
+        } catch (error) {
+          console.log(error)
+        }
+        this.close()
+      }
     },
   },
 }

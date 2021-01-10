@@ -95,20 +95,20 @@ const routes = [
   //   component: () =>
   //     import(/* webpackChunkName: "providers" */ '../views/Providers.vue'),
   // },
-  // {
-  //   path: '/sales',
-  //   name: 'Sales',
-  //   // route level code-splitting
-  //   // this generates a separate chunk (about.[hash].js) for this route
-  //   // which is lazy-loaded when the route is visited.
-  //   component: () =>
-  //     import(/* webpackChunkName: "sales" */ '../views/Sales.vue'),
-  //     meta: {
-  //       requiresAuth: true,
-  //       admin: true,
-  //       seller: true,
-  //     },
-  // },
+  {
+    path: '/sales',
+    name: 'Sales',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () =>
+      import(/* webpackChunkName: "sales" */ '../views/Sales.vue'),
+    meta: {
+      requiresAuth: true,
+      admin: true,
+      seller: true,
+    },
+  },
   {
     path: '/clients',
     name: 'Clients',
