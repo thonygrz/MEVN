@@ -6,7 +6,7 @@ import vuetify from './plugins/vuetify'
 import axios from 'axios'
 
 Vue.config.productionTip = false
-axios.defaults.baseURL = 'http://localhost:3001/api/'
+axios.defaults.baseURL = 'https://comprasventas-mevn-api.herokuapp.com/api/'
 
 new Vue({
   router,
