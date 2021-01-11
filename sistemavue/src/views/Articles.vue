@@ -8,6 +8,10 @@
     >
       <template v-slot:top>
         <v-toolbar flat>
+          <v-btn @click="guardarPDF" color="blue"
+            ><v-icon>mdi-printer</v-icon></v-btn
+          >
+          <v-divider class="mx-4" inset vertical></v-divider>
           <v-toolbar-title>Artículos</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-text-field
@@ -153,6 +157,8 @@
 
 <script>
 import axios from 'axios'
+import { jsPDF } from 'jspdf'
+import 'jspdf-autotable'
 export default {
   name: 'Articles',
   data: () => ({
@@ -353,10 +359,6 @@ export default {
       this.categoria = ''
     },
 
-    // lookForCategory(name){
-    //   return
-    // }
-
     async save() {
       if (this.editedIndex === 1) {
         // se edita
@@ -420,6 +422,38 @@ export default {
       if (status === 1) return 'green'
       else if (status === 0) return 'red'
       else return 'black'
+    },
+
+    guardarPDF() {
+      let cols = [
+        { title: 'Nombre', dataKey: 'name' },
+        { title: 'Código', dataKey: 'code' },
+        { title: 'Categoría', dataKey: 'category' },
+        { title: 'Stock', dataKey: 'stock' },
+        { title: 'Precio Venta', dataKey: 'sellingPrice' },
+      ]
+
+      let rows = this.articulos.map(function(x) {
+        console.log('category: ', x.category)
+        return {
+          name: x.name,
+          code: x.code,
+          category: x.category.name,
+          stock: x.stock,
+          sellingPrice: x.sellingPrice,
+        }
+      })
+
+      const doc = new jsPDF('p', 'pt')
+
+      doc.autoTable(cols, rows, {
+        margin: { top: 60 },
+        addPageContent: function() {
+          doc.text('Lista de Artículos', 40, 30)
+        },
+      })
+
+      doc.save('Articulos.pdf')
     },
   },
 }
